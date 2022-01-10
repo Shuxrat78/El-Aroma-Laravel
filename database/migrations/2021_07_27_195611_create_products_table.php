@@ -20,7 +20,7 @@ class CreateProductsTable extends Migration
             $table->string('capacity_id');
             $table->string('name');
             $table->string('price');
-            $table->string('file_name');
+            $table->string('filename');
             // $table->timestamps();
         });
     }
