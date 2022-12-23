@@ -34,3 +34,7 @@ Route::get('/products', 'App\Http\Controllers\ProductController@productList')->n
 
 Route::get('/update-foto', 'App\Http\Controllers\ProductController@updateFoto')->name('update-foto');
 Route::post('/update-foto-submit', 'App\Http\Controllers\ProductController@updateFotoSubmit')->name('update-foto-submit');
+
+/*Route::group(['prefix' => 'admin'], function () {
+    Voyager::routes();
+});*/
