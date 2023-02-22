@@ -21,7 +21,7 @@
 
       @foreach($brend as $brnd)        
           
-          <i class="fs-5">{{$brnd->brand_name}}</i><br>
+          <i class="fs-5">{{$brnd->name}}</i><br>
               
       @endforeach
 

@@ -13,7 +13,7 @@ Auth::routes();
 // })->name('contact');
 
 Route::get('/', 'App\Http\Controllers\ProductController@productView')->name('product-view');
-Route::post('/', 'App\Http\Controllers\ProductController@productView')->name('product-view');
+//Route::post('/', 'App\Http\Controllers\ProductController@productView')->name('product-view');
 Route::post('/', 'App\Http\Controllers\ProductController@productReq')->name('product-req');
 
 Route::get('/brendsubmit', 'App\Http\Controllers\BrandController@brend_submit')->name('brend-submit');

@@ -10,7 +10,7 @@
             <select class="form-select shadow bg-body rounded" name="brend_id" id="inputGroupSelect01" required>
               <option selected></option>
               @foreach($brend as $brnd)
-              <option value="{{$brnd->id}}">{{$brnd->brand_name}}</option>
+              <option value="{{$brnd->id}}">{{$brnd->name}}</option>
               @endforeach
             </select>
         </div>
@@ -23,7 +23,7 @@
             <select class="form-select shadow bg-body rounded" name="cat_id" id="inputGroupSelect01" required>
               <option selected></option>
               @foreach($category as $ctgry)
-              <option value="{{$ctgry->id}}">{{$ctgry->category_name}}</option>
+              <option value="{{$ctgry->id}}">{{$ctgry->name}}</option>
               @endforeach    
             </select>
         </div>

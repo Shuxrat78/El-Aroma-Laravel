@@ -83,7 +83,7 @@ class ProductController extends Controller{
         $category = new Category();
         $capacity = new Capacity();
 
-    return view('products', ['data'=>$product->paginate(20), 'brend'=>$brend->all(), 'category'=>$category->all(), 'capacity'=>$capacity->all()]);
+    return view('products', ['data'=>$product->paginate(5), 'brend'=>$brend->all(), 'category'=>$category->all(), 'capacity'=>$capacity->all()]);
         }
 
 
@@ -97,131 +97,81 @@ class ProductController extends Controller{
             ->select('products.*', 'products.name', 'products.price', 'products.filename', 'capacities.cpct')
         ->get();
 
-        foreach($brend->all() as $brnd){$brnd->brand_checked = 0; $brnd->save();}
+        /*foreach($brend->all() as $brnd){$brnd->brand_checked = 0; $brnd->save();}
         foreach($category->all() as $category){$category->category_checked = 0; $category->save();}
         foreach($capacity->all() as $capacity){$capacity->capacity_checked = 0; $capacity->save();}
+        */
         $mn='';
         $mx='';
         
-        return view('home', ['data'=>$product->all(), 'brend'=>$brend->all(), 'category'=>$category->all(), 'capacity'=>$capacity->all(), 'mn'=>$mn, 'mx'=>$mx]);
+        /*return view('home', ['data'=>$product->all(), 'brend'=>$brend->all(), 'category'=>$category->all(), 'capacity'=>$capacity->all(), 'mn'=>$mn, 'mx'=>$mx]);*/
+        return view('home', ['brend'=>$brend->all(), 'category'=>$category->all(), 'capacity'=>$capacity->all()]);
     }
 
     public function productReq(Request $request){ // функция показа товаров с сортировкой
 
-        if (count($request->keys()) == 1){
-        
-            return redirect()->route('product-view');
-            }
-    
-        else
+        $brend = Brand::all()->keyBy('id');
+        $brnd = $brend->except('brand_name')->pluck('id')->toArray();
+        $capacity = Capacity::all()->keyBy('id');
 
-        $brend = new Brand();
-        $category = new Category();
-        $capacity = new Capacity();
-        $product = new Product();
+        if ($request->zp > 1) {
 
-        foreach($product->all() as $prd){$prd->checked = 0; $prd->save();}
-        foreach($brend->all() as $brnd){$brnd->brand_checked = 0; $brnd->save();}
-        foreach($category->all() as $category){$category->category_checked = 0; $category->save();}
-        foreach($capacity->all() as $capacity){$capacity->capacity_checked = 0; $capacity->save();}
+        $data_br1 = collect($request->get('data1'))->keyBy('name');
+        $data_br = $data_br1->except('_token')->pluck('name')->toArray();
+        $data_cat1 = collect($request->get('data2'))->keyBy('name');
+        $data_cat = $data_cat1->except('_token')->pluck('name')->toArray();
+        $data_cap1 = collect($request->get('data3'))->keyBy('name');
+        $data_cap = $data_cap1->except('_token')->pluck('name')->toArray();
+        $data_pr = collect($request->get('data4'))->keyBy('name');
+        $min = $data_pr['min']['value'];
+        $max = $data_pr['max']['value'];
 
-        // Стчетчики
-        $br = 0;
-        $cat = 0;
-        $cap = 0;
-        $prc = 0;
-        $prd = 0;
+        $products = Product::query()
+            ->when($data_br, function ($query) use ($data_br) {
+                $query->whereIn('brand_id', $data_br);
+            })
+            ->when($data_cat, function ($query) use ($data_cat) {
+                $query->whereIn('category_id', $data_cat);
+            })
+            ->when($data_cap, function ($query) use ($data_cap) {
+                $query->whereIn('capacity_id', $data_cap);
+            })
+            ->when($min && $max, function ($query) use ($min, $max) {
+                $query->whereBetween('price', array(intval($min * 1.0), intval($max * 1.0)));
+            })
+            /*->when($data_pr['min']['value'] && $data_pr['max']['value'] , function ($query) use ($data_pr) {
+                $query->whereBetween('price', array($data_pr['min']['value'], $data_pr['max']['value']));
+            })*/
 
-// Чтение и выполнение запросов для таблицы Brands
-        $brnd1 = $brend->all();
-        foreach($brnd1 as $brnd){
-            $nme='brend'.$brnd->id;
-            if ($request->input($nme) != null){
-            $brnd->brand_checked = 1;
-            $brnd->save();            
-            }
-        }
+            ->paginate(5);
 
-// Чтение и выполнение запросов для таблицы Categories
-        $ctgri1 = $category->all();
-        foreach($ctgri1 as $ctgri){
-            $ctg='category'.$ctgri->id;
-            if ($request->input($ctg) != null){
-                $ctgri->category_checked = 1;
-                $ctgri->save();                
-            }
-        }
-
-// Чтение и выполнение запросов для таблицы Capacities
-        $cpct1 = $capacity->all();
-        foreach($cpct1 as $cpct){
-            $cpc='capacity'.$cpct->id;
-            if ($request->input($cpc) != null){
-            $cpct->capacity_checked = 1;
-            $cpct->save();        
-            }
-        }
-
-// Чтение и выполнение запросов для таблицы Products
-        $product1 = $product->all();
-        foreach($product1 as $product2){
-            $nme='brend'.$product2->brand_id;
-            if ($request->input($nme) != null){
-                $product2->checked += 1;
-                $br = 1;
-                $product2->save();
-            }
-            $ctg='category'.$product2->category_id;
-            if ($request->input($ctg) != null){
-                $product2->checked += 1;
-                $cat = 1;
-                $product2->save();
-            }
-            $cpc='capacity'.$product2->capacity_id;
-            if ($request->input($cpc) != null){
-                $product2->checked += 1;
-                $cap = 1;
-                $product2->save();
-            }
-
-            $mn = $request->input('min');
-            $mx = $request->input('max');
-            if (($request->input('min') != null) && ($request->input('max') != null)){
-                if (($mn <= $product2->price) && ($mx >= $product2->price)){
-                    $product2->checked += 1;
-                    $prc = 1;
-                    $product2->save();
+            $products->transform(function ($product) use ($capacity) {
+                if ($capacity->contains($product->capacity_id)) {
+                    $product->cpct = $capacity->get($product->capacity_id)->cpct;
                 }
-            }
+                return $product;
+                });
 
-            if (($request->input('min') == null) && ($request->input('max') != null)){
-                if ($mx >= $product2->price){
-                    $product2->checked += 1;
-                    $prc = 1;
-                    $product2->save();
+        $html = view("inc.bside", ['data' => $products])->render();
+        return response()->json(array('databr' => $data_br, 'datacat' => $products, 'html' => $html));
+
+        }
+        if ($request->zp = 1) {
+            $products = Product::query()
+                ->when($brnd, function ($query) use ($brnd) {
+                    $query->whereIn('brand_id', $brnd);
+                })
+                ->paginate(5);
+
+            $products->transform(function ($product) use ($capacity) {
+                if ($capacity->contains($product->capacity_id)) {
+                    $product->cpct = $capacity->get($product->capacity_id)->cpct;
                 }
-            }
+                return $product;
+            });
+            $html = view("inc.bside", ['data' => $products])->render();
+            return response()->json(array('html' => $html));
 
-            if (($request->input('min') != null) && ($request->input('max') == null)){
-                if ($mn <= $product2->price){
-                    $product2->checked += 1;
-                    $prc = 1;
-                    $product2->save();
-                }
-            }
-
-}
-
-$prd = $br + $cat + $cap + $prc; //Итог запросов к таблицам
-
-$product = DB::table("products")
-->join('capacities', 'products.capacity_id', '=', 'capacities.id')
-->select('products.*', 'products.name', 'products.price', 'products.checked', 'products.filename', 'capacities.cpct')
-// ->orderBy('name', 'asc')
-->orderBy('price', 'asc')
-->where('products.checked', '=', $prd)
-->get();
-
-    return view('home', ['data'=>$product->all(), 'brend'=>$brend->all(), 'category'=>$category->all(), 'capacity'=>$capacity->all(), 'mn'=>$mn, 'mx'=>$mx]);
+        }
     }
 }

@@ -5,13 +5,21 @@
 @endsection
 
 @section('content')
+  <script src="https://cdn.datatables.net/1.13.2/js/jquery.dataTables.min.js"></script>
+  <script src="https://cdn.datatables.net/buttons/2.3.4/js/dataTables.buttons.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.1.3/jszip.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/pdfmake.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/vfs_fonts.js"></script>
+  <script src="https://cdn.datatables.net/buttons/2.3.4/js/buttons.html5.min.js"></script>
+  <script src="https://cdn.datatables.net/buttons/2.3.4/js/buttons.print.min.js"></script>
 
 <div class="container">
 @include('inc.messages')
-
-  <table class="table caption-top">
+  <div id="ExportReport"></div>
+  <br>
+  <table class="table caption-top" id="example">
   
-    <thead class="table-primary fs-4">
+    <thead class="table-secondary fs-4">
       <tr>
         <th scope="col">#</th>
         <th scope="col">Фото</th>
@@ -26,60 +34,42 @@
 <tbody class="fs-5">
   @foreach($data as $prod)
     <tr>
-      <th scope="row">{{($data->currentpage()-1) * $data->perpage() + ($loop->index+1)}}</th>
+      <td scope="row">{{($data->currentpage()-1) * $data->perpage() + ($loop->index+1)}}</td>
       <td><a onclick = "rasm('{{$prod->id}}', '{{$prod->name}}', 'img/{{$prod->filename}}')"><img src="img/{{$prod->filename}}" class="rounded" alt="..." style="width: 45px; height: 35px" data-bs-toggle="modal" data-bs-target="#exampleModal"/></a></td>
       <form action="{{route('product-edit-submit', $prod->id)}}" method="post">
         @csrf
 
-      <td width="40%"><input type="text" name="name" id="prn{{$prod->id}}" value="{{$prod->name}}" class="form-control shadow bg-body rounded" aria-label="Sizing example input" aria-describedby="inputGroup-sizing-lg" required disabled="disabled"></td>
+      <td width="40%">
+      {{$prod->name}}
+      </td>
 
       <!-- Столбец Бренда -->
       <td>
-        <select class="form-select shadow bg-body rounded" name="brend_id"  id="brn{{$prod->id}}" required disabled>
-          @foreach($brend as $brnd)
-            @if ($brnd->id == $prod->brand_id)
-              <option value="{{$brnd->id}}" selected>{{$brnd->brand_name}}</option>
-            @endif
-              <option value="{{$brnd->id}}">{{$brnd->brand_name}}</option>
-            @endforeach
-        </select>
+      {{$prod->brend->name}}
       </td>
 
       <!-- Столбец Категории -->
       <td>
-      <select class="form-select shadow bg-body rounded" name="cat_id" id="catn{{$prod->id}}" required disabled="disabled">
-        @foreach($category as $ctgry)
-        @if ($ctgry->id == $prod->category_id)
-        <option value="{{$ctgry->id}}" selected>{{$ctgry->category_name}}</option>
-        @endif
-        <option value="{{$ctgry->id}}">{{$ctgry->category_name}}</option>
-        @endforeach    
-      </select>        
+        {{$prod->category->name}}
       </td>
 
       <!-- Столбец Объема -->
       <td>
-      <select class="form-select shadow bg-body rounded" name="cap_id" id="capn{{$prod->id}}" required disabled="disabled">
-        @foreach($capacity as $cpcty)
-        @if ($cpcty->id == $prod->capacity_id)
-        <option value="{{$cpcty->id}}" selected>{{$cpcty->cpct}}</option>
-        @endif
-        <option value="{{$cpcty->id}}">{{$cpcty->cpct}}</option>
-        @endforeach    
-      </select>
+        {{$prod->capacity->cpct}}
       </td>
 
       <td width="10%">
-      <input type="number" name="price" id="prc{{$prod->id}}" value="{{$prod->price}}" min="0" step="10000" class="form-control shadow bg-body rounded" aria-label="Sizing example input" aria-describedby="inputGroup-sizing-lg" required disabled="disabled">
-      </td>      
-
+        {{$prod->price}}
+      </td>
       <td class="px-0 py-1" id="btn{{$prod->id}}"><button type="button" class="btn btn-info me-3 py-0 ms-3" onclick="prod_edit('{{$prod->id}}')"><i class="fas fa-edit"></i></button></a><a href="#"><button class="btn btn-danger py-0"><i class="fas fa-trash-alt"></i></button></td>
-      <td class="px-0 py-1" id="bttn{{$prod->id}}" hidden><button  type="submit" class="btn btn-info me-3 py-0 ms-3"><i class="fas fa-save"></i></button><button type="button" onclick="prod_cancel('{{$prod->id}}')" class="btn btn-danger py-0"><i class="fas fa-window-close"></i></button></td>
+
+
     </tr>
 </form>
 @endforeach
   </tbody>
 </table>
+  <br>
 
 <div class="row">
   <div class="col-3">
@@ -166,7 +156,16 @@
 </div>
 <!-- Modal-2 end -->
 
+{{--<script src="https://cdn.datatables.net/1.13.2/js/jquery.dataTables.min.js"></script>
+  <script src="https://cdn.datatables.net/buttons/2.3.4/js/dataTables.buttons.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.1.3/jszip.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/pdfmake.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/vfs_fonts.js"></script>
+  <script src="https://cdn.datatables.net/buttons/2.3.4/js/buttons.html5.min.js"></script>
+  <script src="https://cdn.datatables.net/buttons/2.3.4/js/buttons.print.min.js"></script>--}}
+
 <script>
+
 let d = 0; //доступ к редактирование товара в строке таблицы...
 
 function rasm(id, mn, fn){ //функция для увеличения и изменения фото
@@ -213,6 +212,34 @@ function prod_cancel(id){ // отмена редактирования
   document.getElementById("bttn"+id).setAttribute("hidden","hidden");
   d = 0;
 }
+
+/*$(document).ready(function () {
+  $('#example').DataTable({
+
+    paging: false,
+    ordering: true,
+    info: false,
+    dom: 'Bfrtip',
+    buttons: [
+      'copy', 'csv', 'excel', 'pdf', 'print'
+    ]
+  });
+});*/
+table = $('#example')
+        .DataTable({
+          /*lengthMenu: [15],*/
+          info: false,
+          searching: false,
+          colReorder: false,
+          paging: false,
+          dom: 'Bfrtip',
+          buttons: [
+            'copy', 'csv', 'excel', 'pdf', 'print'],
+        });
+
+$('#example').DataTable().buttons().container().appendTo('#ExportReport');
+
 </script>
 
 @endsection
+  {{--<td class="px-0 py-1" id="bttn{{$prod->id}}" hidden><button  type="submit" class="btn btn-info me-3 py-0 ms-3"><i class="fas fa-save"></i></button><button type="button" onclick="prod_cancel('{{$prod->id}}')" class="btn btn-danger py-0"><i class="fas fa-window-close"></i></button></td>--}}

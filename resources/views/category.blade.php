@@ -21,7 +21,7 @@
 
       @foreach($categori as $ctgri)
           
-          <i class="fs-5">{{$ctgri->category_name}}</i><br>
+          <i class="fs-5">{{$ctgri->name}}</i><br>
               
       @endforeach
 

@@ -14,7 +14,7 @@ class BrandController extends Controller
 
     public function brend_submit(Request $req){
         $brend = new Brand();
-        $brend->brand_name = $req->input('brend');
+        $brend->name = $req->input('brend');
 
         $brend->save();
         return redirect()->route('brend-view');

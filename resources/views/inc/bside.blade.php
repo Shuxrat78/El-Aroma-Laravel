@@ -1,4 +1,5 @@
-<div class="d-flex flex-row flex-wrap">
+<div class="d-md-flex flex-md-row flex-md-wrap">
+@if (isset($data))
 @foreach($data as $prod)
 <div class="d-grid mx-4 mb-5">
   <div class="card border border-dark" style="width: 360px;">
@@ -11,7 +12,7 @@
       @if($prod->cpct == 0)
         <h5>{{$prod->name}}</h5>
       @else
-      <h4>{{$prod->name}} {{$prod->cpct}} ml</h4>
+      <h4>{{$prod->name}} - {{$prod->cpct}} ml</h4>
       @endif
     </a>
 </div>
@@ -34,3 +35,4 @@
 </div>
 @endforeach
 </div>
+@endif

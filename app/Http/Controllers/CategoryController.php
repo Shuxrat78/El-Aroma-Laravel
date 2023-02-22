@@ -14,7 +14,7 @@ class CategoryController extends Controller
 
     public function category_submit(Request $reqc){        
         $category = new Category();
-        $category->category_name = $reqc->input('cat_name');
+        $category->name = $reqc->input('cat_name');
 
         $category->save();
         return redirect()->route('category-view');
